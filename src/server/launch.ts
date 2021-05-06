@@ -38,7 +38,13 @@ export function createSocketConnection(outSocket: net.Socket, inSocket: net.Sock
 }
 
 export function createProcessStreamConnection(process: cp.ChildProcess): IConnection {
-    return createStreamConnection(process.stdout, process.stdin, () => process.kill());
+    return createStreamConnection(process.stdout, process.stdin, () => {
+        cp.exec(`kill -9 ${process.pid}`, (err) => {
+            if (err) {
+                console.error(`Unable to kill compile process. ${err.message}`);
+            }
+        });
+    });
 }
 
 export function createStreamConnection(outStream: stream.Readable, inStream: stream.Writable, onDispose: () => void): IConnection {
